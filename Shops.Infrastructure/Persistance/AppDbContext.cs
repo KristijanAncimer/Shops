@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Shops.Infrastructure.Persistance;
 
 namespace Shops.Domain.Models;
 
-public class AppDbContext : DbContext
+public class AppDbContext : DbContext, IAppDbContext
 {
     public DbSet<Shop> Shops { get; set; } = null!;
 
