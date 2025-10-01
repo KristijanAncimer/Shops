@@ -1,8 +1,9 @@
 ﻿using MediatR;
+using Shops.Application.Common;
 
 namespace Shops.Application.Handlers.Shops.Commands.CreateShop;
 
-public class CreateShopHandlerRequest : IRequest<CreateShopDto>
+public class CreateShopHandlerRequest : IRequest<Result<CreateShopDto>>
 {
     public string Name { get; set; } = string.Empty;
     public CreateShopHandlerRequest(string name)

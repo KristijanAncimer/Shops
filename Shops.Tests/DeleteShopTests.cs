@@ -1,8 +1,8 @@
-﻿using Moq;
+﻿using MockQueryable.Moq;
+using Moq;
 using Shops.Application.Handlers.Shops.Commands.DeleteShop;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
-using Shops.Tests.Common;
 
 namespace Shops.Tests;
 
@@ -14,7 +14,8 @@ public class DeleteShopTests
         // Arrange
         var existing = new Shop { Id = 1, Name = "ToDelete" };
         var shops = new List<Shop> { existing };
-        var mockSet = DbSetMocking.CreateMockDbSet(shops);
+
+        var mockSet = shops.AsQueryable().BuildMockDbSet();
 
         var mockContext = new Mock<IAppDbContext>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
@@ -35,7 +36,9 @@ public class DeleteShopTests
     public async Task Handle_ShouldReturnMessage_WhenNotFound()
     {
         // Arrange
-        var mockSet = DbSetMocking.CreateMockDbSet(new List<Shop>());
+        var shops = new List<Shop>();
+        var mockSet = shops.AsQueryable().BuildMockDbSet();
+
         var mockContext = new Mock<IAppDbContext>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
 

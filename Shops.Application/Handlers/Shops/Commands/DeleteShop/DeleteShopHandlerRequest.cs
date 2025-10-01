@@ -2,7 +2,7 @@
 
 namespace Shops.Application.Handlers.Shops.Commands.DeleteShop;
 
-public class DeleteShopHandlerRequest : IRequest<string>
+public class DeleteShopHandlerRequest : IRequest<Unit>
 {
     public int Id { get; set; }
     public DeleteShopHandlerRequest(int id)

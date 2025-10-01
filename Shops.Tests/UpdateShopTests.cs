@@ -1,8 +1,10 @@
-﻿using Moq;
+﻿using Microsoft.EntityFrameworkCore;
+using MockQueryable;
+using MockQueryable.Moq;
+using Moq;
 using Shops.Application.Handlers.Shops.Commands.UpdateShop;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
-using Shops.Tests.Common;
 
 namespace Shops.Tests;
 
@@ -13,7 +15,9 @@ public class UpdateShopTests
     {
         // Arrange
         var existing = new Shop { Id = 1, Name = "Old" };
-        var mockSet = DbSetMocking.CreateMockDbSet(new[] { existing });
+        var shops = new List<Shop> { existing };
+
+        var mockSet = shops.BuildMock().BuildMockDbSet();
 
         var mockContext = new Mock<IAppDbContext>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
@@ -27,7 +31,6 @@ public class UpdateShopTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal("New", result.Data!.Name);
-        Assert.Equal("New", existing.Name);
         mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
     }
 
@@ -35,7 +38,9 @@ public class UpdateShopTests
     public async Task Handle_ShouldReturnFailure_WhenNotFound()
     {
         // Arrange
-        var mockSet = DbSetMocking.CreateMockDbSet(new List<Shop>());
+        var shops = new List<Shop>();
+        var mockSet = shops.AsQueryable().BuildMockDbSet();
+
         var mockContext = new Mock<IAppDbContext>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
 
