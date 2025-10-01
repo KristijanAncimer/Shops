@@ -1,14 +1,15 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Shops.Domain.Models;
+using Shops.Infrastructure.Persistance;
 
 namespace Shops.Application.Handlers.Shops.Queries.GetShops;
 
 public class GetShopsHandler : IRequestHandler<GetShopsHandlerRequest, List<GetShopsHandlerDto>>
 {
-    private readonly AppDbContext _context;
+    private readonly IAppDbContext _context;
 
-    public GetShopsHandler(AppDbContext context)
+    public GetShopsHandler(IAppDbContext context)
     {
         _context = context;
     }

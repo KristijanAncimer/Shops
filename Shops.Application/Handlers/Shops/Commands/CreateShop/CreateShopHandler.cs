@@ -1,6 +1,7 @@
 ﻿using Azure.Core;
 using MediatR;
 using Shops.Domain.Models;
+using Shops.Infrastructure.Persistance;
 using System;
 using System.Threading;
 
@@ -8,8 +9,8 @@ namespace Shops.Application.Handlers.Shops.Commands.CreateShop;
 
 public class CreateShopHandler : IRequestHandler<CreateShopHandlerRequest, CreateShopDto>
 {
-    private readonly AppDbContext _context;
-    public CreateShopHandler(AppDbContext context)
+    private readonly IAppDbContext _context;
+    public CreateShopHandler(IAppDbContext context)
     {
         _context = context;
     }

@@ -1,24 +1,28 @@
 ﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Shops.Domain.Models;
+using Shops.Infrastructure.Persistance;
+using static System.Formats.Asn1.AsnWriter;
 
 namespace Shops.Application.Handlers.Shops.Commands.DeleteShop;
 
 public class DeleteShopHandler : IRequestHandler<DeleteShopHandlerRequest, string>
 {
-    private readonly AppDbContext _context;
-    public DeleteShopHandler(AppDbContext context)
+    private readonly IAppDbContext _context;
+    public DeleteShopHandler(IAppDbContext context)
     {
         _context = context;
     }
     public async Task<string> Handle(DeleteShopHandlerRequest request, CancellationToken cancellationToken)
     {
-        var powerPlant = await _context.Shops.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-        if (powerPlant == null)
+        var shop = _context.Shops
+        .FirstOrDefault(x => x.Id == request.Id);
+
+        if (shop == null)
         {
             return $"Shop with id {request.Id} does not exist.";
         }
-        _context.Shops.Remove(powerPlant);
+        _context.Shops.Remove(shop);
         await _context.SaveChangesAsync(cancellationToken);
 
         return $"Shop {request.Id} was deleted successfully.";

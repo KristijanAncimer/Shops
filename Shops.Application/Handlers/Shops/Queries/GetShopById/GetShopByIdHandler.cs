@@ -2,13 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Shops.Application.Common;
 using Shops.Domain.Models;
+using Shops.Infrastructure.Persistance;
 
 namespace Shops.Application.Handlers.Shops.Queries.GetShopById;
 
 public class GetShopByIdHandler : IRequestHandler<GetShopByIdHandlerRequest, Result<GetShopByIdHandlerDto>>
 {
-    private readonly AppDbContext _context;
-    public GetShopByIdHandler(AppDbContext context)
+    private readonly IAppDbContext _context;
+    public GetShopByIdHandler(IAppDbContext context)
     {
         _context = context;
     }
