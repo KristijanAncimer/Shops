@@ -1,9 +1,20 @@
 ﻿using MediatR;
-using Shops.Domain.Models;
+using Shops.Application.Common;
 
 namespace Shops.Application.Handlers.Shops.Queries.GetShops;
 
-public record GetShopsHandlerRequest(string? Filter) : IRequest<List<GetShopsHandlerDto>>
+public class GetShopsHandlerRequest : IRequest<Result<PaginatedResult<GetShopsHandlerDto>>>
 {
-    public static GetShopsHandlerRequest Create(string? filter) => new(filter);
+    public string? Filter { get; }
+    public int PageNumber { get; }
+    public int PageSize { get; }
+
+    public GetShopsHandlerRequest(string? filter, int? pageNumber = 1, int? pageSize = 10)
+    {
+        Filter = filter;
+        PageNumber = pageNumber ?? 1;
+        PageSize = pageSize ?? 10;
+    }
+    public static GetShopsHandlerRequest Create(string? filter, int? pageNumber, int? pageSize)
+        => new(filter, pageNumber, pageSize);
 }

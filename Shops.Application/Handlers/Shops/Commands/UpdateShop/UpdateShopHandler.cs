@@ -18,7 +18,7 @@ public class UpdateShopHandler : IRequestHandler<UpdateShopHandlerRequest, Resul
 
     public async Task<Result<UpdateShopHandlerDto>> Handle(UpdateShopHandlerRequest request, CancellationToken cancellationToken)
     {
-        var shop = _context.Shops.FirstOrDefault(x => x.Id == request.Id);
+        var shop = await _context.Shops.FirstOrDefaultAsync(x => x.Id == request.Id,cancellationToken);
 
         if (shop == null)
         {
@@ -26,7 +26,6 @@ public class UpdateShopHandler : IRequestHandler<UpdateShopHandlerRequest, Resul
         }
 
         shop.Name = request.Name;
-        shop.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync(cancellationToken);
 

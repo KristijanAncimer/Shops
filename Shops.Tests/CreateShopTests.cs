@@ -1,9 +1,9 @@
-﻿using MediatR;
+﻿using Microsoft.Extensions.Logging;
+using MockQueryable.Moq;
 using Moq;
 using Shops.Application.Handlers.Shops.Commands.CreateShop;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
-using Shops.Tests.Common;
 
 namespace Shops.Tests;
 
@@ -14,23 +14,24 @@ public class CreateShopTests
     {
         // Arrange
         var shops = new List<Shop>();
-        var mockSet = DbSetMocking.CreateMockDbSet(shops);
+        var mockSet = shops.AsQueryable().BuildMockDbSet();
 
         var mockContext = new Mock<IAppDbContext>();
+        var mockLogger = new Mock<ILogger<CreateShopHandler>>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
 
-        var handler = new CreateShopHandler(mockContext.Object);
+        var handler = new CreateShopHandler(mockContext.Object, mockLogger.Object);
         var request = new CreateShopHandlerRequest("Test Shop");
 
         // Act
         var result = await handler.Handle(request, default);
 
         // Assert
-        mockSet.Verify(s => s.Add(It.IsAny<Shop>()), Times.Once);
+        mockSet.Verify(s => s.AddAsync(It.IsAny<Shop>(), default), Times.Once);
         mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
 
         Assert.NotNull(result);
-        Assert.Equal("Test Shop", result.Name);
-        Assert.NotEqual(1, result.Id);
+        Assert.Equal("Test Shop", result?.Data?.Name);
+        Assert.Equal(0, result?.Data?.Id);
     }
 }
