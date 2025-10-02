@@ -6,11 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.EntityFrameworkCore.SqlServer;
 
 namespace Auth.Infrastructure;
 
-public static class DependencyInjection
+public static class AuthDependencyInjection
 {
     public static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration config)
     {

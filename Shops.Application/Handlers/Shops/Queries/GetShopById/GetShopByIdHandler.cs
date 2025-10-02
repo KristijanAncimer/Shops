@@ -15,7 +15,7 @@ public class GetShopByIdHandler : IRequestHandler<GetShopByIdHandlerRequest, Res
     }
     public async Task<Result<GetShopByIdHandlerDto>> Handle(GetShopByIdHandlerRequest request, CancellationToken cancellationToken)
     {
-        var shop = await _context.Shops
+        var shop = await _context.Shops.AsNoTracking()
             .Where(s => s.Id == request.Id)
             .Select(s => new GetShopByIdHandlerDto {
                 Id = s.Id,

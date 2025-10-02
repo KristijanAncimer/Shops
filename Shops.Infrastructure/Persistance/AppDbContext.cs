@@ -49,5 +49,8 @@ public class AppDbContext : DbContext, IAppDbContext
             .Property(r => r.Name)
             .IsRequired()
             .HasMaxLength(200);
+
+        modelBuilder.Entity<Shop>()
+            .HasIndex(s => s.Name);
     }
 }
