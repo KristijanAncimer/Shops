@@ -1,3 +1,5 @@
+using Auth.Infrastructure;
+using Core.Health;
 using Core.Middlewares;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -17,6 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var environment = builder.Environment.EnvironmentName;
 
+builder.Services.AddAuth(builder.Configuration);
+builder.Services.AddAppHealthChecks(builder.Configuration);
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -48,6 +52,9 @@ if (!builder.Environment.IsEnvironment("Testing"))
         .EnableSensitiveDataLogging()
         .LogTo(Log.Information, LogLevel.Information)
     );
+
+    builder.Services.AddDbContext<AuthDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection")));
 }
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddFluentValidationAutoValidation();
@@ -58,9 +65,40 @@ builder.Services.AddTransient<GlobalExceptionMiddleware>();
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyMarker).Assembly));
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new() { Title = "Shops API", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Enter 'Bearer' [space] and then your valid token.\r\n\r\nExample: \"Bearer eyJhbGci...\""
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseRateLimiter();
 app.UseMiddleware<PerformanceLoggingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
@@ -77,6 +115,8 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
+app.MapAuthEndpoints();
 app.MapShopEndpoints();
+app.MapHealthChecks("/health");
 app.Run();
 public partial class Program { }
