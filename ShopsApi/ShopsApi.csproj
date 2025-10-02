@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Authetication.Infrastructure\Auth.Infrastructure.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Shops.Application\Shops.Application.csproj" />
     <ProjectReference Include="..\Shops.Infrastructure\Shops.Infrastructure.csproj" />

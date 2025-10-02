@@ -12,7 +12,8 @@ public static class ShopEndpoints
 {
     public static IEndpointRouteBuilder MapShopEndpoints(this IEndpointRouteBuilder app)
     {
-        var mapGroup = app.MapGroup("/Shop");
+        var mapGroup = app.MapGroup("/Shop")
+            .RequireAuthorization();
 
         mapGroup.MapGet("/{id}", GetShopById)
             .RequireRateLimiting("fixed")
