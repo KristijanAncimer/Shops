@@ -1,4 +1,5 @@
 using Auth.Infrastructure;
+using Core.Cache;
 using Core.Health;
 using Core.Middlewares;
 using FluentValidation;
@@ -61,6 +62,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateShopHandlerRequest>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddTransient<GlobalExceptionMiddleware>();
+builder.Services.AddAppRedisCache(builder.Configuration);
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyMarker).Assembly));
 
