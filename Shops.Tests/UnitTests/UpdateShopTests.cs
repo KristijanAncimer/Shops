@@ -1,39 +1,39 @@
 ﻿using MockQueryable.Moq;
 using Moq;
-using Shops.Application.Handlers.Shops.Commands.DeleteShop;
+using Shops.Application.Handlers.Shops.Commands.UpdateShop;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
 
-namespace Shops.Tests;
+namespace Shops.Tests.UnitTests;
 
-public class DeleteShopTests
+public class UpdateShopTests
 {
     [Fact]
-    public async Task Handle_ShouldRemoveShop_WhenExists()
+    public async Task Handle_ShouldUpdateName_WhenShopExists()
     {
         // Arrange
-        var existing = new Shop { Id = 1, Name = "ToDelete" };
+        var existing = new Shop { Id = 1, Name = "Old" };
         var shops = new List<Shop> { existing };
 
-        var mockSet = shops.AsQueryable().BuildMockDbSet();
+        var mockSet = shops.BuildMock().BuildMockDbSet();
 
         var mockContext = new Mock<IAppDbContext>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
 
-        var handler = new DeleteShopHandler(mockContext.Object);
-        var request = new DeleteShopHandlerRequest(1);
+        var handler = new UpdateShopHandler(mockContext.Object);
+        var request = new UpdateShopHandlerRequest(1, "New");
 
         // Act
         var result = await handler.Handle(request, default);
 
         // Assert
-        Assert.Equal("Shop 1 was deleted successfully.", result);
-        mockSet.Verify(s => s.Remove(It.Is<Shop>(x => x.Id == 1)), Times.Once);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("New", result.Data!.Name);
         mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_ShouldReturnMessage_WhenNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenNotFound()
     {
         // Arrange
         var shops = new List<Shop>();
@@ -42,15 +42,15 @@ public class DeleteShopTests
         var mockContext = new Mock<IAppDbContext>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
 
-        var handler = new DeleteShopHandler(mockContext.Object);
-        var request = new DeleteShopHandlerRequest(99);
+        var handler = new UpdateShopHandler(mockContext.Object);
+        var request = new UpdateShopHandlerRequest(99, "DoesNotExist");
 
         // Act
         var result = await handler.Handle(request, default);
 
         // Assert
-        Assert.Equal("Shop with id 99 does not exist.", result);
-        mockSet.Verify(s => s.Remove(It.IsAny<Shop>()), Times.Never);
+        Assert.False(result.IsSuccess);
+        Assert.Equal("Shop with id 99 does not exist.", result.Error);
         mockContext.Verify(c => c.SaveChangesAsync(default), Times.Never);
     }
 }

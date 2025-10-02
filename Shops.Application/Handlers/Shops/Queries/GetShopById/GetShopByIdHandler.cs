@@ -18,6 +18,7 @@ public class GetShopByIdHandler : IRequestHandler<GetShopByIdHandlerRequest, Res
         var shop = await _context.Shops
             .Where(s => s.Id == request.Id)
             .Select(s => new GetShopByIdHandlerDto {
+                Id = s.Id,
                 Name = s.Name,
                 CreatedAt = s.CreatedAt,
                 UpdatedAt = s.UpdatedAt})

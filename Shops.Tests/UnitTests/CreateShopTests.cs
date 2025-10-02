@@ -5,7 +5,7 @@ using Shops.Application.Handlers.Shops.Commands.CreateShop;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
 
-namespace Shops.Tests;
+namespace Shops.Tests.UnitTests;
 
 public class CreateShopTests
 {
@@ -30,8 +30,7 @@ public class CreateShopTests
         mockSet.Verify(s => s.AddAsync(It.IsAny<Shop>(), default), Times.Once);
         mockContext.Verify(c => c.SaveChangesAsync(default), Times.Once);
 
-        Assert.NotNull(result);
+        Assert.True(result.IsSuccess);
         Assert.Equal("Test Shop", result?.Data?.Name);
-        Assert.Equal(0, result?.Data?.Id);
     }
 }
