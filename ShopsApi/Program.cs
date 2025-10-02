@@ -15,6 +15,14 @@ using ShopsApi.Util;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var environment = builder.Environment.EnvironmentName;
+
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{environment}.json", optional: true)
+    .AddEnvironmentVariables();
+
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
@@ -31,14 +39,16 @@ builder.Services.AddRateLimiter(_ => _
         options.QueueLimit = 1;
     }));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        sqlOptions => sqlOptions.MigrationsAssembly("Shops.Infrastructure")
-    )
-    .EnableSensitiveDataLogging()
-    .LogTo(Log.Information, LogLevel.Information)
-);
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection"),
+            sqlOptions => sqlOptions.MigrationsAssembly("Shops.Infrastructure"))
+        .EnableSensitiveDataLogging()
+        .LogTo(Log.Information, LogLevel.Information)
+    );
+}
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateShopHandlerRequest>();
@@ -54,7 +64,11 @@ var app = builder.Build();
 app.UseRateLimiter();
 app.UseMiddleware<PerformanceLoggingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
-await DatabaseMigrator.Migrate(app, default);
+
+if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+{
+    await DatabaseMigrator.Migrate(app, default);
+}
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
@@ -65,4 +79,4 @@ app.UseSwaggerUI(c =>
 
 app.MapShopEndpoints();
 app.Run();
-
+public partial class Program { }
