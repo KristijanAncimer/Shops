@@ -1,0 +1,7 @@
+﻿IF DB_ID(N'Shops') IS NULL
+    CREATE DATABASE Shops;
+GO
+
+IF DB_ID(N'AuthDb') IS NULL
+    CREATE DATABASE AuthDb;
+GO

@@ -20,6 +20,10 @@ public class GetShopsHandler : IRequestHandler<GetShopsHandlerRequest, Result<Pa
 
     public async Task<Result<PaginatedResult<GetShopsHandlerDto>>> Handle(GetShopsHandlerRequest request, CancellationToken cancellationToken)
     {
+        await _cache.SetStringAsync("test_key", "Hello Redis!");
+        var value = await _cache.GetStringAsync("test_key");
+        Console.WriteLine(value);
+
         var cacheKey = $"{request.PageNumber}_{request.PageSize}_{request.Filter}";
         var cached = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
