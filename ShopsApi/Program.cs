@@ -105,7 +105,7 @@ app.UseRateLimiter();
 app.UseMiddleware<PerformanceLoggingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
-if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))
+if (!app.Environment.IsEnvironment("Testing"))
 {
     await DatabaseMigrator.Migrate(app, default);
 }

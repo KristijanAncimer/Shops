@@ -1,0 +1,64 @@
+services:
+   sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Strong!Passw0rd
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql
+      - ./initDatabases.sql:/initDatabases.sql:ro
+      - ./entryP.sh:/entryP.sh:ro
+    entrypoint: ["/bin/bash", "/entryP.sh"]
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep sqlservr > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+   redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+   redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+   shopsapi:
+    image: ${DOCKER_REGISTRY-}shopsapi
+    build:
+      context: .
+      dockerfile: ShopsApi/Dockerfile
+    ports:
+      - "5000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=Shops;User ID=sa;Password=Strong!Passw0rd;TrustServerCertificate=True
+      - ConnectionStrings__AuthConnection=Server=sqlserver,1433;Database=AuthDb;User ID=sa;Password=Strong!Passw0rd;TrustServerCertificate=True
+      - Redis__Configuration=redis:6379
+      - Redis__InstanceName=Shops_
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  sql_data:
