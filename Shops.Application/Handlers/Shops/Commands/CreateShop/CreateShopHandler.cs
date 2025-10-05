@@ -1,4 +1,7 @@
-﻿using MediatR;
+﻿using AutoMapper;
+using Core.Cache;
+using MediatR;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Shops.Application.Common;
 using Shops.Domain.Models;
@@ -10,10 +13,15 @@ public class CreateShopHandler : IRequestHandler<CreateShopHandlerRequest, Resul
 {
     private readonly IAppDbContext _context;
     private readonly ILogger<CreateShopHandler> _logger;
-    public CreateShopHandler(IAppDbContext context, ILogger<CreateShopHandler> logger)
+    private readonly IMapper _mapper;
+    private readonly IDistributedCache _cache;
+
+    public CreateShopHandler(IAppDbContext context, ILogger<CreateShopHandler> logger, IMapper mapper, IDistributedCache cache)
     {
         _context = context;
         _logger = logger;
+        _mapper = mapper;
+        _cache = cache;
     }
 
     public async Task<Result<CreateShopDto>> Handle(CreateShopHandlerRequest request, CancellationToken cancellationToken)
@@ -26,11 +34,9 @@ public class CreateShopHandler : IRequestHandler<CreateShopHandlerRequest, Resul
         await _context.Shops.AddAsync(shop, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
 
-        var dto = new CreateShopDto
-        {
-            Id = shop.Id,
-            Name = shop.Name
-        };
+        await _cache.IncrementVersionAsync(cancellationToken);
+
+        var dto = _mapper.Map<CreateShopDto>(shop);
         _logger.LogInformation("Shop created with {@Dto}", dto);
         return Result<CreateShopDto>.Success(dto);
     }

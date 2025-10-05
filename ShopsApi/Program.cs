@@ -1,4 +1,5 @@
 using Auth.Infrastructure;
+using AutoMapper;
 using Core.Cache;
 using Core.Health;
 using Core.Middlewares;
@@ -11,10 +12,12 @@ using Serilog;
 using Shops.Application;
 using Shops.Application.Behaviors;
 using Shops.Application.Handlers.Shops.Commands.CreateShop;
+using Shops.Application.Mappings;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
 using ShopsApi.Endpoints;
 using ShopsApi.Util;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,15 +59,21 @@ if (!builder.Environment.IsEnvironment("Testing"))
 
     builder.Services.AddDbContext<AuthDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection")));
+    builder.Services.AddAppRedisCache(builder.Configuration);
 }
+else
+{
+    builder.Services.AddDistributedMemoryCache();
+}
+
 builder.Services.AddScoped<IAppDbContext, AppDbContext>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateShopHandlerRequest>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 builder.Services.AddTransient<GlobalExceptionMiddleware>();
-builder.Services.AddAppRedisCache(builder.Configuration);
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyMarker).Assembly));
+builder.Services.AddAutoMapper(typeof(ShopMappingProfile).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

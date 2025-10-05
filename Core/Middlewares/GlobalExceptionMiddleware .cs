@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using FluentValidation;
 using Core.Middlewares.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Core.Middlewares;
 
@@ -43,6 +44,11 @@ public class GlobalExceptionMiddleware : IMiddleware
             case NotFoundException notFoundEx:
                 statusCode = HttpStatusCode.NotFound;
                 message = notFoundEx.Message;
+                break;
+
+            case DbUpdateConcurrencyException:
+                statusCode = HttpStatusCode.NotFound;
+                message = "The requested entity no longer exists or was already modified/deleted.";
                 break;
 
             case UnauthorizedAccessException:

@@ -1,29 +1,34 @@
-﻿using Core.Middlewares.Exceptions;
+﻿using Core.Cache;
+using Core.Middlewares.Exceptions;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
-using static System.Formats.Asn1.AsnWriter;
 
 namespace Shops.Application.Handlers.Shops.Commands.DeleteShop;
 
 public class DeleteShopHandler : IRequestHandler<DeleteShopHandlerRequest, Unit>
 {
     private readonly IAppDbContext _context;
-    public DeleteShopHandler(IAppDbContext context)
+    private readonly IDistributedCache _cache;
+    public DeleteShopHandler(IAppDbContext context, IDistributedCache cache)
     {
         _context = context;
+        _cache = cache;
     }
     public async Task<Unit> Handle(DeleteShopHandlerRequest request, CancellationToken cancellationToken)
     {
-        var shop = await _context.Shops.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+        var shop = new Shop { Id = request.Id };
 
-        if (shop == null)
-        {
-            throw new NotFoundException($"Shop with id {request.Id} was not found.");
-        }
+        _context.Shops.Attach(shop);
         _context.Shops.Remove(shop);
-        await _context.SaveChangesAsync(cancellationToken);
+
+        var affected = await _context.SaveChangesAsync(cancellationToken);
+
+        await _cache.IncrementVersionAsync(cancellationToken);
+
+        if (affected == 0)
+            throw new NotFoundException($"Shop with id {request.Id} was not found.");
 
         return Unit.Value;
     }
