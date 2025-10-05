@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AutoMapper;
+using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.Extensions.Logging;
 using MockQueryable.Moq;
 using Moq;
 using Shops.Application.Handlers.Shops.Commands.CreateShop;
+using Shops.Application.Handlers.Shops.Commands.UpdateShop;
 using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
 
@@ -20,7 +23,13 @@ public class CreateShopTests
         var mockLogger = new Mock<ILogger<CreateShopHandler>>();
         mockContext.Setup(c => c.Shops).Returns(mockSet.Object);
 
-        var handler = new CreateShopHandler(mockContext.Object, mockLogger.Object);
+        var mockMapper = new Mock<IMapper>();
+        mockMapper.Setup(m => m.Map<CreateShopDto>(It.IsAny<Shop>()))
+          .Returns((Shop s) => new CreateShopDto { Name = s.Name });
+
+        var mockCache = new Mock<IDistributedCache>();
+
+        var handler = new CreateShopHandler(mockContext.Object, mockLogger.Object, mockMapper.Object, mockCache.Object);
         var request = new CreateShopHandlerRequest("Test Shop");
 
         // Act
