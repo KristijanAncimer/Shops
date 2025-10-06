@@ -129,5 +129,5 @@ app.UseSwaggerUI(c =>
 app.MapAuthEndpoints();
 app.MapShopEndpoints();
 app.MapHealthChecks("/health");
-app.Run();
+await app.RunAsync();
 public partial class Program { }

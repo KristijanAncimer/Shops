@@ -1,0 +1,7 @@
+﻿C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Migrations\20250930112510_InitialCreateShopDatabase.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Migrations\20250930112510_InitialCreateShopDatabase.Designer.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Migrations\20251002200418_AddShopNameIndex.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Migrations\20251002200418_AddShopNameIndex.Designer.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Migrations\AppDbContextModelSnapshot.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Persistance\AppDbContext.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Shops.Infrastructure\Persistance\IAppDbContext.cs
