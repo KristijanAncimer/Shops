@@ -1,0 +1,8 @@
+﻿C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\ApplicationUser.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\AuthDbContext.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\AuthDependencyInjection.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\AuthEndpoints.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\CurrentUserService.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\Migrations\20251002182054_InitialIdentity.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\Migrations\20251002182054_InitialIdentity.Designer.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Authetication.Infrastructure\Migrations\AuthDbContextModelSnapshot.cs

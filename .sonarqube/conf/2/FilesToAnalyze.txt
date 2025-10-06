@@ -1,0 +1,7 @@
+﻿C:\Users\KristijanAncimer\source\repos\Shops\Core\Auth\ICurrentUserService.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Core\Cache\CacheVersionHelper.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Core\Cache\CachingDependencyInjection.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Core\Health\HealthChecksExtensions.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Core\Middlewares\Exceptions\NotFoundException.cs
+C:\Users\KristijanAncimer\source\repos\Shops\Core\Middlewares\GlobalExceptionMiddleware .cs
+C:\Users\KristijanAncimer\source\repos\Shops\Core\Middlewares\PerformanceLoggingMiddleware.cs
