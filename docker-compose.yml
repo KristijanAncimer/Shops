@@ -1,5 +1,5 @@
 services:
-   sqlserver:
+  sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: sqlserver
     environment:
@@ -19,29 +19,32 @@ services:
       retries: 10
       start_period: 60s
 
-   redis:
+  redis:
     image: redis:latest
     container_name: redis
+    command: ["redis-server", "--requirepass", "Strong!Passw0rd"]
     ports:
       - "6379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "Strong!Passw0rd", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-   redis-commander:
+  redis-commander:
     image: rediscommander/redis-commander:latest
     container_name: redis-commander
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOSTS=local:redis:6379:0:Strong!Passw0rd
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=Strong!Passw0rd
     ports:
       - "8081:8081"
     depends_on:
       redis:
         condition: service_healthy
 
-   shopsapi:
+  shopsapi:
     image: ${DOCKER_REGISTRY-}shopsapi
     build:
       context: .
@@ -52,7 +55,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=Shops;User ID=sa;Password=Strong!Passw0rd;TrustServerCertificate=True
       - ConnectionStrings__AuthConnection=Server=sqlserver,1433;Database=AuthDb;User ID=sa;Password=Strong!Passw0rd;TrustServerCertificate=True
-      - Redis__Configuration=redis:6379
+      - Redis__Configuration=redis:6379,password=Strong!Passw0rd
       - Redis__InstanceName=Shops_
     depends_on:
       sqlserver:
@@ -60,7 +63,7 @@ services:
       redis:
         condition: service_healthy
 
-   sonarqube:
+  sonarqube:
     image: sonarqube:community
     container_name: sonarqube
     ports:
@@ -75,4 +78,4 @@ services:
 volumes:
   sql_data:
   sonarqube_data:
-  sonarqube_extensions:  
+  sonarqube_extensions:
