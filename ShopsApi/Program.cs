@@ -1,7 +1,7 @@
 using Auth.Infrastructure;
-using AutoMapper;
 using Core.Cache;
 using Core.Health;
+using Core.Integrations.Weather;
 using Core.Middlewares;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -17,7 +17,6 @@ using Shops.Domain.Models;
 using Shops.Infrastructure.Persistance;
 using ShopsApi.Endpoints;
 using ShopsApi.Util;
-using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,6 +73,7 @@ builder.Services.AddTransient<GlobalExceptionMiddleware>();
 
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(AssemblyMarker).Assembly));
 builder.Services.AddAutoMapper(typeof(ShopMappingProfile).Assembly);
+builder.Services.AddWeatherIntegration();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -128,6 +128,7 @@ app.UseSwaggerUI(c =>
 
 app.MapAuthEndpoints();
 app.MapShopEndpoints();
+app.MapWeatherEndpoints();
 app.MapHealthChecks("/health");
 await app.RunAsync();
 public partial class Program { }
