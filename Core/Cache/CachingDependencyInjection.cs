@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Core.Cache.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Core.Cache;
@@ -13,6 +14,8 @@ public static class CachingDependencyInjection
             options.Configuration = redisConfig["Configuration"];
             options.InstanceName = redisConfig["InstanceName"];
         });
+
+        services.AddScoped<IShopsCacheService, ShopsCacheService>();
 
         return services;
     }

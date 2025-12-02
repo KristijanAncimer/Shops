@@ -1,40 +1,36 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Core.Cache;
+using Core.Cache.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Shops.Application.Common;
 using Shops.Infrastructure.Persistance;
-using System.Text.Json;
 
 namespace Shops.Application.Handlers.Shops.Queries.GetShops;
 
 public class GetShopsHandler : IRequestHandler<GetShopsHandlerRequest, Result<PaginatedResult<GetShopsHandlerDto>>>
 {
     private readonly IAppDbContext _context;
-    private readonly IDistributedCache _cache;
+    private readonly IShopsCacheService _cacheService;
     private readonly IMapper _mapper;
 
-    public GetShopsHandler(IAppDbContext context, IDistributedCache cache, IMapper mapper)
+    public GetShopsHandler(IAppDbContext context, IShopsCacheService cacheService, IMapper mapper)
     {
         _context = context;
-        _cache = cache;
+        _cacheService = cacheService;
         _mapper = mapper;
     }
 
     public async Task<Result<PaginatedResult<GetShopsHandlerDto>>> Handle(GetShopsHandlerRequest request, CancellationToken cancellationToken)
     {
-        //var cacheKey = $"GetShops:{request.PageNumber}:{request.PageSize}:{request.Filter ?? "none"}";
-        var version = await _cache.GetCurrentVersionAsync(cancellationToken);
-        var cacheKey = $"GetShops:v{version}:{request.PageNumber}:{request.PageSize}:{request.Filter ?? "none"}";
+        var cachedResult = await _cacheService.GetCachedShopsAsync<PaginatedResult<GetShopsHandlerDto>>(
+            request.PageNumber,
+            request.PageSize,
+            request.Filter,
+            cancellationToken);
 
-        var cached = await _cache.GetStringAsync(cacheKey, cancellationToken);
-        if (!string.IsNullOrEmpty(cached))
-        {
-            var cachedResult = JsonSerializer.Deserialize<PaginatedResult<GetShopsHandlerDto>>(cached);
-            return Result<PaginatedResult<GetShopsHandlerDto>>.Success(cachedResult!);
-        }
+        if (cachedResult != null)
+            return Result<PaginatedResult<GetShopsHandlerDto>>.Success(cachedResult);
 
         var query = _context.Shops.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(request.Filter))
@@ -57,17 +53,12 @@ public class GetShopsHandler : IRequestHandler<GetShopsHandlerRequest, Result<Pa
             PageSize = request.PageSize
         };
 
-        var cacheOptions = new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5),
-            SlidingExpiration = TimeSpan.FromMinutes(2)
-        };
-        await _cache.SetStringAsync(
-            cacheKey,
-            JsonSerializer.Serialize(pagedResult),
-            cacheOptions,
-            cancellationToken
-        );
+        await _cacheService.SetCachedShopsAsync(
+            request.PageNumber,
+            request.PageSize,
+            request.Filter,
+            pagedResult,
+            cancellationToken);
 
         return Result<PaginatedResult<GetShopsHandlerDto>>.Success(pagedResult);
     }
